@@ -106,10 +106,12 @@ int hashmap_remove(HashMap *map, const char *key){
     }
 
     if (nb>0){
-        return map->table[indice].value;
+        map->table[indice].value=TOMBSTONE;
+        map->table[indice].key=NULL;
+        return indice;
     }
 
-    return "pas de clé trouvé"; 
+    return -1; 
 }
 
 
@@ -120,8 +122,12 @@ void hashmap_destroy(HashMap *map){
         exit(64);
     }
 
-    free(map->table);
-    free(map);
-
+    for(int i=0;i<map->size;i++){
+        if (map->table[i].key != NULL && map->table[i].key != TOMBSTONE) {
+        free(map->table[i].key);
+       }
+   }
+   free(map->table);
+   free(map);
 
 }
