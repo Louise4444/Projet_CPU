@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 # define TOMBSTONE (( void *) -1)
 #define TABLE_SIZE 127
 

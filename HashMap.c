@@ -98,10 +98,18 @@ int hashmap_remove(HashMap *map, const char *key){
         exit(64);
     }
 
-    map->table[simple_hash(key)].value=TOMBSTONE;
-    map->table[simple_hash(key)].key=NULL;
+    unsigned long indice = simple_hash(key);
+    int nb=map->size;
+    while(nb>0 && map->table[indice].key!=key){
+        nb--;
+        indice = (indice+ 1)% map->size;
+    }
 
-    return 0;
+    if (nb>0){
+        return map->table[indice].value;
+    }
+
+    return "pas de clé trouvé"; 
 }
 
 
