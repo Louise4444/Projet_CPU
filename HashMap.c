@@ -68,27 +68,25 @@ int hashmap_insert(HashMap *map, const char *key, void *value){
 }
 
 void* hashmap_get(HashMap *map, const char *key) {
+
     if (!map || !(map->table)) {
         fprintf(stderr, "Erreur : table de hachage inexistante - Fichier: %s, Fonction: %s, Ligne: %d\n",
                 __FILE__, __PRETTY_FUNCTION__, __LINE__);
         exit(64);
     }
 
-    HashEntry entry_result = map->table[simple_hash(key)];
+    unsigned long indice = simple_hash(key);
+    int nb=map->size;
+    while(nb>0 && map->table[indice].key!=key){
+        nb--;
+        indice = (indice+ 1)% map->size;
+    }
 
-    int trouve=0;
+    if (nb>0){
+        return map->table[indice].value;
+    }
 
-    while (!trouve)
-
-        // Vérifier si la clé correspond
-        if (entry_result.key || strcmp(entry_result.key, key) == 0 ) {
-            return NULL; 
-        }
-
-
-
-    // Retourne la valeur stockée
-    return &(entry_result.value); 
+    return "pas de clé trouvé"; 
 }
 
 
