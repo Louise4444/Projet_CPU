@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 # define TOMBSTONE (( void *) -1)
+#define TABLE_SIZE 127
 
 typedef struct hashentry {
     char * key ;

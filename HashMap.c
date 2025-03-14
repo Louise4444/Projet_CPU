@@ -12,19 +12,20 @@ unsigned long simple_hash(const char *str){
         converted_str+= str[i];
     }
     
-    return converted_str;
+    return converted_str % TABLE_SIZE;
 }
 
 HashMap* hashmap_create(){
 
-    HashMap* hash = malloc(sizeof(HashMap));
+    HashMap* hash = (HashMap*) malloc(sizeof(HashMap));
 
     if (!hash){
         fprintf(stderr,"Erreur d'allocation de la table de hachage %s %s %d \n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        return NULL;
     }
 
-    hash->size=127;
-    hash->table= malloc(sizeof(HashEntry)*127); 
+    hash->size=TABLE_SIZE;
+    hash->table= (HashEntry*) malloc(sizeof(HashEntry)*TABLE_SIZE); 
 
     if (!hash->table){
         fprintf(stderr,"Erreur d'allocation de la table de hachage %s %s %d \n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -42,35 +43,79 @@ HashMap* hashmap_create(){
 
 int hashmap_insert(HashMap *map, const char *key, void *value){
 
-    if (!map || !(map->table)){
-        fprintf (stderr,"table de hachage non existente %s %s %d \n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+    unsigned long indice = simple_hash(key);
+    int nb=map->size;
+    while(nb>0 && map->table[indice].key!=NULL && map->table[indice].key!=TOMBSTONE){
+        if (strcmp(map->table[indice].key, key) == 0) {
+            map->table[indice].value = value; 
+            return 1;
+        }
+        nb--;
+        indice = (indice+ 1)% map->size;
+    }
+
+    if (nb>0){
+        map->table[indice].key=strdup(key);
+        map->table[indice].value=value;
+        return indice; 
+    }
+
+    else{
+        printf("table pleine"); 
+        return -1;
+    }
+
+}
+
+void* hashmap_get(HashMap *map, const char *key) {
+    if (!map || !(map->table)) {
+        fprintf(stderr, "Erreur : table de hachage inexistante - Fichier: %s, Fonction: %s, Ligne: %d\n",
+                __FILE__, __PRETTY_FUNCTION__, __LINE__);
         exit(64);
     }
 
-    int indice_insert= simple_hash(key);
+    HashEntry entry_result = map->table[simple_hash(key)];
 
-    map->table[indice_insert].key=key;
-    map->table[indice_insert].value=value;
+    int trouve=0;
 
-    return indice_insert;
+    while (!trouve)
 
+        // Vérifier si la clé correspond
+        if (entry_result.key || strcmp(entry_result.key, key) == 0 ) {
+            return NULL; 
+        }
+
+
+
+    // Retourne la valeur stockée
+    return &(entry_result.value); 
 }
 
-
-void* hashmap_get(HashMap *map, const char *key){
-
-
-}
 
 
 int hashmap_remove(HashMap *map, const char *key){
+    if (!map || !(map->table)) {
+        fprintf(stderr, "Erreur : table de hachage inexistante - Fichier: %s, Fonction: %s, Ligne: %d\n",
+                __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        exit(64);
+    }
 
+    map->table[simple_hash(key)].value=TOMBSTONE;
+    map->table[simple_hash(key)].key=NULL;
 
     return 0;
 }
 
 
 void hashmap_destroy(HashMap *map){
+    if (!map || !(map->table)) {
+        fprintf(stderr, "Erreur : table de hachage inexistante - Fichier: %s, Fonction: %s, Ligne: %d\n",
+                __FILE__, __PRETTY_FUNCTION__, __LINE__);
+        exit(64);
+    }
+
+    free(map->table);
+    free(map);
 
 
 }
