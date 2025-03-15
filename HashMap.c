@@ -132,3 +132,4 @@ void hashmap_destroy(HashMap *map){
    free(map);
 
 }
+

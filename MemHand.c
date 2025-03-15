@@ -25,7 +25,10 @@ Segment* find_free_segment(MemoryHandler* handler, int start, int size, Segment*
 
     Segment* current = handler->free_list;
 
-    while(current  && current->start!= start && current->size != size){
+    while(current){
+
+        if (current->start = start && current->size >= size) break;
+
         *prev = current ;
         current  = current-> next ;
     }
@@ -41,7 +44,33 @@ Segment* find_free_segment(MemoryHandler* handler, int start, int size, Segment*
 
 int create_segment(MemoryHandler *handler, const char *name,int start, int size){
 
-    return 0;
+    Segment* new_seg;
+    Segment* prev = NULL; 
+    Segment* seg_free= find_free_segment(handler, start, size, &prev);
+
+    if (seg_free){
+        
+        if (seg_free->size = size){
+            prev->next= seg_free->next;
+            new_seg= seg_free;    
+        }
+
+        else {
+            seg_free->start += size;
+            seg_free->size -= size;
+            new_seg= malloc (sizeof(Segment));
+            new_seg->start=start;
+            new_seg->size= size;
+            new_seg->next=NULL;
+            
+        }
+
+        hashmap_insert ( handler, name,new_seg);
+        return -1;
+        
+    }
+
+    return -1;
 }
 
 
